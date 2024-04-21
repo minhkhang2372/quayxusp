@@ -107,7 +107,7 @@ async def spin(update: Update, context):
 async def stop(update: Update, context):
     await update.message.reply_text("Bot đã dừng! Dùng lệnh /spin để kích hoạt lại nha")
     # Dừng vòng lặp chính của bot
-    context.application.stop()
+    await context.application.stop()
 
 # Cập nhật hàm chính để thêm trình xử lý cho lệnh /stop
 def main():
@@ -124,3 +124,6 @@ def main():
 
     # Bắt đầu chạy bot
     application.run_polling()
+
+if __name__ == "__main__":
+    main()
