@@ -1,9 +1,9 @@
 import os
 import requests
 import time
-import asyncio
 from datetime import datetime
 import pytz
+import asyncio
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Application, CommandHandler
 
@@ -58,18 +58,24 @@ def convert_shopee_link(username):
 # Định nghĩa múi giờ UTC+7
 utc_plus_7 = pytz.timezone('Asia/Ho_Chi_Minh')
 
+# Queue để lên kế hoạch các nhiệm vụ
+task_queue = asyncio.Queue()
+
+# Hàm xử lý các nhiệm vụ từ Queue
+async def process_tasks():
+    while True:
+        # Chờ đợi nhiệm vụ được thêm vào Queue
+        task = await task_queue.get()
+        
+        # Thực hiện nhiệm vụ
+        await task
+
 # Định nghĩa hàm xử lý lệnh /start
 async def start(update: Update, context):
     await update.message.reply_text("Hello bạn, xài bot thì dùng lệnh /spin để kích hoạt nhé!")
 
 # Định nghĩa hàm xử lý lệnh /spin
 async def spin(update: Update, context):
-    async def send_message(text, keyboard=None):
-        if keyboard:
-            await update.message.reply_text(text, reply_markup=keyboard)
-        else:
-            await update.message.reply_text(text)
-    
     current_time_millis = int(time.time() * 1000)
     api_data = get_api_data(current_time_millis)
     
@@ -94,19 +100,34 @@ async def spin(update: Update, context):
                       f"Lượt nhận: {spinner.get('slot', 'N/A')} lượt\n" \
                       f"Bắt đầu quay lúc: {start_time_str}\n"
             
-            await send_message(message, keyboard=keyboard)
+            await update.message.reply_text(message, reply_markup=keyboard)
             await asyncio.sleep(5)
     else:
-        await send_message("No spin!")
+        await update.message.reply_text("No spin!")
+
+# Hàm xử lý lệnh /stop
+async def stop(update: Update, context):
+    await update.message.reply_text("Bot đã dừng lại!")
+    # Dừng vòng lặp chính
+    context.loop.stop()
 
 # Hàm chính
 def main():
     application = Application.builder().token(TOKEN).build()
 
+    # Thêm các trình xử lý lệnh
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("spin", spin))
+    application.add_handler(CommandHandler("spin", enqueue_task))
+    application.add_handler(CommandHandler("stop", stop))
 
+    # Bắt đầu chạy bot
     application.run_polling()
 
+async def enqueue_task(update: Update, context):
+    # Thêm nhiệm vụ vào Queue
+    await task_queue.put(spin(update, context))
+
 if __name__ == "__main__":
+    # Khởi tạo và chạy vòng lặp xử lý nhiệm vụ
+    asyncio.run(process_tasks())
     main()
