@@ -6,8 +6,8 @@ import pytz
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Application, CommandHandler
 
-# Lấy token Telegram từ biến môi trường
-TOKEN = os.getenv("QUAY_XU_BOT")
+# Sử dụng token trực tiếp
+TOKEN = "7010785413:AAHo3-95sFfnzL7t_3OImoA1jT0ICHVCBDE"
 
 # Định nghĩa hàm lấy dữ liệu từ API Shopee
 def get_api_data(current_time_millis):
