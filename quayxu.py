@@ -24,7 +24,7 @@ def get_api_data(current_time_millis):
         return data
     else:
         # Nếu yêu cầu không thành công, in ra mã trạng thái và thông báo lỗi
-        print("Failed to fetch data from API. Status code:", response.status_code)
+        print("Hệ thống lỗi!! Status code:", response.status_code)
         return None
 
 # Định nghĩa hàm chuyển đổi link Shopee từ username
@@ -59,7 +59,7 @@ utc_plus_7 = pytz.timezone('Asia/Ho_Chi_Minh')
 
 # Định nghĩa hàm xử lý lệnh /start
 async def start(update: Update, context):
-    await update.message.reply_text("Hello bạn, xài bot thì dùng lệnh /spin để kích hoạt nhé!")
+    await update.message.reply_text("Hello bạn, dùng lệnh /spin để kích hoạt, /stop để dừng lại nhé!")
 
 # Định nghĩa hàm xử lý lệnh /spin
 async def spin(update: Update, context):
@@ -103,7 +103,13 @@ async def spin(update: Update, context):
         
         time.sleep(60)
 
-# Hàm chính
+# Định nghĩa hàm xử lý lệnh /stop
+async def stop(update: Update, context):
+    await update.message.reply_text("Bot đã dừng! Dùng lệnh /spin để kích hoạt lại nha")
+    # Dừng vòng lặp chính của bot
+    context.application.stop()
+
+# Cập nhật hàm chính để thêm trình xử lý cho lệnh /stop
 def main():
     global utc_plus_7
     utc_plus_7 = pytz.timezone('Asia/Ho_Chi_Minh')
@@ -111,12 +117,10 @@ def main():
     # Tạo ứng dụng bot
     application = Application.builder().token(TOKEN).build()
 
-    # Thêm trình xử lý lệnh /start và /spin
+    # Thêm trình xử lý lệnh /start, /spin và /stop
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("spin", spin))
+    application.add_handler(CommandHandler("stop", stop))  # Thêm trình xử lý cho lệnh /stop
 
     # Bắt đầu chạy bot
     application.run_polling()
-
-if __name__ == "__main__":
-    main()
