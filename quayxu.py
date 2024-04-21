@@ -7,7 +7,7 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Application, CommandHandler
 
 # Lấy token Telegram từ biến môi trường
-TOKEN = os.getenv("QUAY_XU_BOT_TOKEN")
+TOKEN = os.getenv("QUAY_XU_BOT")
 
 # Định nghĩa hàm lấy dữ liệu từ API Shopee
 def get_api_data(current_time_millis):
