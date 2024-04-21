@@ -59,7 +59,7 @@ utc_plus_7 = pytz.timezone('Asia/Ho_Chi_Minh')
 
 # Định nghĩa hàm xử lý lệnh /start
 async def start(update: Update, context):
-    await update.message.reply_text("Hello bạn, săn xu thì dùng lệnh /spin để bắt đầu, /stop để dừng lại nhé")
+    await update.message.reply_text("Hello bạn, xài bot thì dùng lệnh /spin để kích hoạt nhé!")
 
 # Định nghĩa hàm xử lý lệnh /spin
 async def spin(update: Update, context):
@@ -101,13 +101,13 @@ async def spin(update: Update, context):
         else:
             await send_message("No spin!")
         
-        time.sleep(100)
+        time.sleep(60)
 
 # Định nghĩa hàm xử lý lệnh /stop
 async def stop(update: Update, context):
-    await update.message.reply_text("Bot đã dừng lại! Dùng lệnh /spin để tiếp tục chạy")
+    await update.message.reply_text("Bot đã dừng lại!")
     # Gửi lệnh dừng cho ứng dụng và kết thúc chương trình
-    await application.stop()
+    await context.application.stop()
 
 # Hàm chính
 def main():
