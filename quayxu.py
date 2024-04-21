@@ -1,3 +1,4 @@
+import os
 import requests
 import time
 from datetime import datetime
@@ -5,9 +6,8 @@ import pytz
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Application, CommandHandler
 
-# Token của bot Telegram
-TOKEN = "${{ secrets.QUAY_XU_BOT }}"
-#r
+# Lấy token Telegram từ biến môi trường
+TOKEN = os.getenv("QUAY_XU_BOT_TOKEN")
 
 # Định nghĩa hàm lấy dữ liệu từ API Shopee
 def get_api_data(current_time_millis):
