@@ -101,7 +101,7 @@ async def spin(update: Update, context):
         else:
             await send_message("No spin!")
         
-        time.sleep(50)
+        time.sleep(40)
 
 # Hàm chính
 def main():
