@@ -57,10 +57,19 @@ def convert_shopee_link(username):
 # Định nghĩa múi giờ UTC+7
 utc_plus_7 = pytz.timezone('Asia/Ho_Chi_Minh')
 
+# Định nghĩa hàm xử lý lệnh /start
 async def start(update: Update, context):
-    await update.message.reply_text("Hello bạn, xài bot thì dùng lệnh /spin , muốn dừng thì /stop nhé!")
+    await update.message.reply_text("Hello bạn, xài bot thì dùng lệnh /spin để kích hoạt nhé!")
 
+# Định nghĩa hàm xử lý lệnh /spin
 async def spin(update: Update, context):
+    # Định nghĩa một hàm để gửi tin nhắn
+    async def send_message(text, keyboard=None):
+        if keyboard:
+            await update.message.reply_text(text, reply_markup=keyboard)
+        else:
+            await update.message.reply_text(text)
+    
     while True:
         current_time_millis = int(time.time() * 1000)
         api_data = get_api_data(current_time_millis)
@@ -88,19 +97,13 @@ async def spin(update: Update, context):
                 
                 # Gửi tin nhắn thay vì in ra terminal
                 await send_message(message, keyboard=keyboard)
-                await asyncio.sleep(5)  # Chờ 1 giây trước khi gửi tin nhắn tiếp theo
+                time.sleep(5)
         else:
             await send_message("No spin!")
         
-        await asyncio.sleep(60)  # Chờ 60 giây trước khi gửi yêu cầu API tiếp theo
+        time.sleep(60)
 
-
-# Định nghĩa hàm xử lý lệnh /stop
-async def stop(update: Update, context):
-    await update.message.reply_text("Bot đã dừng lại. Dùng lệnh /spin để tiếp tục chạy")
-    await context.application.stop()
-
-
+# Hàm chính
 def main():
     global utc_plus_7
     utc_plus_7 = pytz.timezone('Asia/Ho_Chi_Minh')
@@ -108,10 +111,9 @@ def main():
     # Tạo ứng dụng bot
     application = Application.builder().token(TOKEN).build()
 
-    # Thêm trình xử lý lệnh /start, /spin và /stop
+    # Thêm trình xử lý lệnh /start và /spin
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("spin", spin))
-    application.add_handler(CommandHandler("stop", stop))
 
     # Bắt đầu chạy bot
     application.run_polling()
