@@ -3,7 +3,6 @@ import requests
 import time
 from datetime import datetime
 import pytz
-import asyncio
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Application, CommandHandler
 
@@ -25,7 +24,7 @@ def get_api_data(current_time_millis):
         return data
     else:
         # Nếu yêu cầu không thành công, in ra mã trạng thái và thông báo lỗi
-        print("Có lỗi rồi. Báo Admin ngay!! Error", response.status_code)
+        print("Có lỗi rồi!! Vui lòng thử lại:", response.status_code)
         return None
 
 # Định nghĩa hàm chuyển đổi link Shopee từ username
@@ -98,17 +97,11 @@ async def spin(update: Update, context):
                 
                 # Gửi tin nhắn thay vì in ra terminal
                 await send_message(message, keyboard=keyboard)
-                await asyncio.sleep(5)
+                time.sleep(7)
         else:
             await send_message("No spin!")
         
-        await asyncio.sleep(60)
-
-# Định nghĩa hàm xử lý lệnh /stop
-async def stop(update: Update, context):
-    await update.message.reply_text("Bot đã dừng lại! Dùng lệnh /spin để tiếp tục chạy")
-    # Dừng luồng chạy spin
-    context.task.cancel()
+        time.sleep(50)
 
 # Hàm chính
 def main():
@@ -118,10 +111,9 @@ def main():
     # Tạo ứng dụng bot
     application = Application.builder().token(TOKEN).build()
 
-    # Thêm trình xử lý lệnh /start, /spin và /stop
+    # Thêm trình xử lý lệnh /start và /spin
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("spin", spin))
-    application.add_handler(CommandHandler("stop", stop))
 
     # Bắt đầu chạy bot
     application.run_polling()
