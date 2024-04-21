@@ -1,9 +1,9 @@
 import os
 import requests
 import time
+import asyncio
 from datetime import datetime
 import pytz
-import asyncio
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Application, CommandHandler
 
@@ -64,66 +64,48 @@ async def start(update: Update, context):
 
 # Định nghĩa hàm xử lý lệnh /spin
 async def spin(update: Update, context):
-    # Định nghĩa một hàm để gửi tin nhắn
     async def send_message(text, keyboard=None):
         if keyboard:
             await update.message.reply_text(text, reply_markup=keyboard)
         else:
             await update.message.reply_text(text)
     
-    while True:
-        current_time_millis = int(time.time() * 1000)
-        api_data = get_api_data(current_time_millis)
-        
-        if api_data and "data" in api_data and "allSpinner" in api_data["data"]:
-            all_spinner = api_data["data"]["allSpinner"]
-            for spinner in all_spinner:
-                # Chuyển đổi thời gian từ UTC sang UTC+7
-                start_time_utc = datetime.strptime(spinner["startTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
-                start_time_utc = pytz.utc.localize(start_time_utc)
-                start_time_utc7 = start_time_utc.astimezone(utc_plus_7)
-                start_time_str = start_time_utc7.strftime("%H:%M:%S - %d/%m/%Y")
-                
-                # Chuyển đổi link Shopee từ username
-                shopee_link = convert_shopee_link(spinner.get('userName', 'N/A'))
-                
-                # Tạo nút "Vào săn xu"
-                button_text = "👉 Vào LIVE Săn Xu"
-                keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(button_text, url=shopee_link)]])
-                
-                message = f"Tên Shop: {spinner.get('shopName', 'N/A')}\n" \
-                          f"Số xu nhận: {spinner.get('maxcoin', 'N/A')}\n" \
-                          f"Lượt nhận: {spinner.get('slot', 'N/A')} lượt\n" \
-                          f"Bắt đầu quay lúc: {start_time_str}\n"
-                
-                # Gửi tin nhắn thay vì in ra terminal
-                await send_message(message, keyboard=keyboard)
-                await asyncio.sleep(5)
-        else:
-            await send_message("No spin!")
-        
-        await asyncio.sleep(60)
-
-# Định nghĩa hàm xử lý lệnh /stop
-async def stop(update: Update, context):
-    await update.message.reply_text("Bot đã dừng lại!")
-    # Dừng luồng chạy spin
-    context.task.cancel()
+    current_time_millis = int(time.time() * 1000)
+    api_data = get_api_data(current_time_millis)
+    
+    if api_data and "data" in api_data and "allSpinner" in api_data["data"]:
+        all_spinner = api_data["data"]["allSpinner"]
+        for spinner in all_spinner:
+            # Chuyển đổi thời gian từ UTC sang UTC+7
+            start_time_utc = datetime.strptime(spinner["startTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            start_time_utc = pytz.utc.localize(start_time_utc)
+            start_time_utc7 = start_time_utc.astimezone(utc_plus_7)
+            start_time_str = start_time_utc7.strftime("%H:%M:%S - %d/%m/%Y")
+            
+            # Chuyển đổi link Shopee từ username
+            shopee_link = convert_shopee_link(spinner.get('userName', 'N/A'))
+            
+            # Tạo nút "Vào săn xu"
+            button_text = "👉 Vào LIVE Săn Xu"
+            keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(button_text, url=shopee_link)]])
+            
+            message = f"Tên Shop: {spinner.get('shopName', 'N/A')}\n" \
+                      f"Số xu nhận: {spinner.get('maxcoin', 'N/A')}\n" \
+                      f"Lượt nhận: {spinner.get('slot', 'N/A')} lượt\n" \
+                      f"Bắt đầu quay lúc: {start_time_str}\n"
+            
+            await send_message(message, keyboard=keyboard)
+            await asyncio.sleep(5)
+    else:
+        await send_message("No spin!")
 
 # Hàm chính
 def main():
-    global utc_plus_7
-    utc_plus_7 = pytz.timezone('Asia/Ho_Chi_Minh')
-
-    # Tạo ứng dụng bot
     application = Application.builder().token(TOKEN).build()
 
-    # Thêm trình xử lý lệnh /start, /spin và /stop
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("spin", spin))
-    application.add_handler(CommandHandler("stop", stop))
 
-    # Bắt đầu chạy bot
     application.run_polling()
 
 if __name__ == "__main__":
