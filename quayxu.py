@@ -1,6 +1,6 @@
 import os
 import requests
-import asyncio
+import time
 from datetime import datetime
 import pytz
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
@@ -57,7 +57,6 @@ def convert_shopee_link(username):
 # Định nghĩa múi giờ UTC+7
 utc_plus_7 = pytz.timezone('Asia/Ho_Chi_Minh')
 
-# Định nghĩa hàm xử lý lệnh /start
 async def start(update: Update, context):
     await update.message.reply_text("Hello bạn, xài bot thì dùng lệnh /spin , muốn dừng thì /stop nhé!")
 
@@ -101,7 +100,7 @@ async def stop(update: Update, context):
     await update.message.reply_text("Bot đã dừng lại. Dùng lệnh /spin để tiếp tục chạy")
     await context.application.stop()
 
-# Hàm chính
+
 def main():
     global utc_plus_7
     utc_plus_7 = pytz.timezone('Asia/Ho_Chi_Minh')
