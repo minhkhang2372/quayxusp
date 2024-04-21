@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 import pytz
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Application, CommandHandler
+from telegram.ext import Updater, CommandHandler, CallbackContext
 
 # Sử dụng token trực tiếp
 TOKEN = "7010785413:AAHo3-95sFfnzL7t_3OImoA1jT0ICHVCBDE"
@@ -24,7 +24,7 @@ def get_api_data(current_time_millis):
         return data
     else:
         # Nếu yêu cầu không thành công, in ra mã trạng thái và thông báo lỗi
-        print("Hệ thống lỗi!! Status code:", response.status_code)
+        print("Đã xảy ra lỗi. Status code:", response.status_code)
         return None
 
 # Định nghĩa hàm chuyển đổi link Shopee từ username
@@ -58,18 +58,11 @@ def convert_shopee_link(username):
 utc_plus_7 = pytz.timezone('Asia/Ho_Chi_Minh')
 
 # Định nghĩa hàm xử lý lệnh /start
-async def start(update: Update, context):
-    await update.message.reply_text("Hello bạn, dùng lệnh /spin để kích hoạt, /stop để dừng lại nhé!")
+def start(update: Update, context: CallbackContext):
+    update.message.reply_text("Hello bạn, xài bot thì dùng lệnh /spin để kích hoạt nhé!")
 
 # Định nghĩa hàm xử lý lệnh /spin
-async def spin(update: Update, context):
-    # Định nghĩa một hàm để gửi tin nhắn
-    async def send_message(text, keyboard=None):
-        if keyboard:
-            await update.message.reply_text(text, reply_markup=keyboard)
-        else:
-            await update.message.reply_text(text)
-    
+def spin(update: Update, context: CallbackContext):
     while True:
         current_time_millis = int(time.time() * 1000)
         api_data = get_api_data(current_time_millis)
@@ -96,34 +89,41 @@ async def spin(update: Update, context):
                           f"Bắt đầu quay lúc: {start_time_str}\n"
                 
                 # Gửi tin nhắn thay vì in ra terminal
-                await send_message(message, keyboard=keyboard)
+                update.message.reply_text(message, reply_markup=keyboard)
                 time.sleep(5)
         else:
-            await send_message("No spin!")
+            update.message.reply_text("No spin!")
         
         time.sleep(60)
 
 # Định nghĩa hàm xử lý lệnh /stop
-async def stop(update: Update, context):
-    await update.message.reply_text("Bot đã dừng! Dùng lệnh /spin để kích hoạt lại nha")
+def stop(update: Update, context: CallbackContext):
+    update.message.reply_text("Bot đã dừng! Dùng lệnh /spin để kích hoạt lại nha")
     # Dừng vòng lặp chính của bot
-    await context.application.stop()
 
-# Cập nhật hàm chính để thêm trình xử lý cho lệnh /stop
+    context.job_queue.stop()
+
+# Hàm chính
 def main():
     global utc_plus_7
     utc_plus_7 = pytz.timezone('Asia/Ho_Chi_Minh')
 
-    # Tạo ứng dụng bot
-    application = Application.builder().token(TOKEN).build()
+    # Tạo Updater
+    updater = Updater(token=TOKEN, use_context=True)
 
-    # Thêm trình xử lý lệnh /start, /spin và /stop
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("spin", spin))
-    application.add_handler(CommandHandler("stop", stop))  # Thêm trình xử lý cho lệnh /stop
+    # Lấy dispatcher từ updater
+    dispatcher = updater.dispatcher
 
-    # Bắt đầu chạy bot
-    application.run_polling()
+    # Thêm trình xử lý lệnh /start và /spin
+    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CommandHandler("spin", spin))
+    dispatcher.add_handler(CommandHandler("stop", stop))  # Thêm trình xử lý cho lệnh /stop
+
+    # Bắt đầu lặp công việc của bot
+    updater.start_polling()
+
+    # Dừng khi nhận lệnh /stop
+    updater.idle()
 
 if __name__ == "__main__":
     main()
