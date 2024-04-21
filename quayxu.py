@@ -107,7 +107,7 @@ async def spin(update: Update, context):
 async def stop(update: Update, context):
     await update.message.reply_text("Bot đã dừng lại!")
     # Gửi lệnh dừng cho ứng dụng và kết thúc chương trình
-    await context.application.stop()
+    await application.stop()
 
 # Hàm chính
 def main():
