@@ -24,7 +24,7 @@ def get_api_data(current_time_millis):
         return data
     else:
         # Nếu yêu cầu không thành công, in ra mã trạng thái và thông báo lỗi
-        print("Có lỗi rồi!! Vui lòng thử lại:", response.status_code)
+        print("Failed to fetch data from API. Status code:", response.status_code)
         return None
 
 # Định nghĩa hàm chuyển đổi link Shopee từ username
@@ -91,17 +91,17 @@ async def spin(update: Update, context):
                 keyboard = InlineKeyboardMarkup([[InlineKeyboardButton(button_text, url=shopee_link)]])
                 
                 message = f"Tên Shop: {spinner.get('shopName', 'N/A')}\n" \
-                          f"Số xu nhận: {spinner.get('maxcoin', 'N/A')} xu\n" \
+                          f"Số xu nhận: {spinner.get('maxcoin', 'N/A')}\n" \
                           f"Lượt nhận: {spinner.get('slot', 'N/A')} lượt\n" \
                           f"Bắt đầu quay lúc: {start_time_str}\n"
                 
                 # Gửi tin nhắn thay vì in ra terminal
                 await send_message(message, keyboard=keyboard)
-                time.sleep(7)
+                time.sleep(5)
         else:
             await send_message("No spin!")
         
-        time.sleep(50)
+        time.sleep(60)
 
 # Hàm chính
 def main():
