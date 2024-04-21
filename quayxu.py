@@ -1,6 +1,6 @@
 import os
 import requests
-import time
+import asyncio
 from datetime import datetime
 import pytz
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
@@ -61,15 +61,7 @@ utc_plus_7 = pytz.timezone('Asia/Ho_Chi_Minh')
 async def start(update: Update, context):
     await update.message.reply_text("Hello bạn, xài bot thì dùng lệnh /spin , muốn dừng thì /stop nhé!")
 
-# Định nghĩa hàm xử lý lệnh /spin
 async def spin(update: Update, context):
-    # Định nghĩa một hàm để gửi tin nhắn
-    async def send_message(text, keyboard=None):
-        if keyboard:
-            await update.message.reply_text(text, reply_markup=keyboard)
-        else:
-            await update.message.reply_text(text)
-    
     while True:
         current_time_millis = int(time.time() * 1000)
         api_data = get_api_data(current_time_millis)
@@ -81,7 +73,7 @@ async def spin(update: Update, context):
                 start_time_utc = datetime.strptime(spinner["startTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
                 start_time_utc = pytz.utc.localize(start_time_utc)
                 start_time_utc7 = start_time_utc.astimezone(utc_plus_7)
-                start_time_str = start_time_utc7.strftime("%Y-%m-%d %H:%M:%S")
+                start_time_str = start_time_utc7.strftime("%H:%M:%S - %d/%m/%Y")
                 
                 # Chuyển đổi link Shopee từ username
                 shopee_link = convert_shopee_link(spinner.get('userName', 'N/A'))
@@ -97,18 +89,16 @@ async def spin(update: Update, context):
                 
                 # Gửi tin nhắn thay vì in ra terminal
                 await send_message(message, keyboard=keyboard)
-                
-                # Chờ 3 giây trước khi hiển thị spin tiếp theo
-                time.sleep(5)
+                await asyncio.sleep(5)  # Chờ 1 giây trước khi gửi tin nhắn tiếp theo
         else:
-            await send_message("No spin data available.")
+            await send_message("No spin!")
         
-        # Chờ 60 giây trước khi gửi yêu cầu API tiếp theo
-        time.sleep(60)
+        await asyncio.sleep(60)  # Chờ 60 giây trước khi gửi yêu cầu API tiếp theo
+
 
 # Định nghĩa hàm xử lý lệnh /stop
 async def stop(update: Update, context):
-    await update.message.reply_text("Bot đã dừng lại. Để tiếp tục chạy dùng lệnh /spin")
+    await update.message.reply_text("Bot đã dừng lại. Dùng lệnh /spin để tiếp tục chạy")
     await context.application.stop()
 
 # Hàm chính
