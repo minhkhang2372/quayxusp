@@ -108,7 +108,7 @@ async def spin(update: Update, context):
 
 # Định nghĩa hàm xử lý lệnh /stop
 async def stop(update: Update, context):
-    await update.message.reply_text("Bot đã dừng lại.")
+    await update.message.reply_text("Bot đã dừng lại. Để tiếp tục chạy dùng lệnh /spin")
     await context.application.stop()
 
 # Hàm chính
