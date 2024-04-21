@@ -3,6 +3,7 @@ import requests
 import time
 from datetime import datetime
 import pytz
+import asyncio
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Application, CommandHandler
 
@@ -97,17 +98,17 @@ async def spin(update: Update, context):
                 
                 # Gửi tin nhắn thay vì in ra terminal
                 await send_message(message, keyboard=keyboard)
-                time.sleep(5)
+                await asyncio.sleep(5)
         else:
             await send_message("No spin!")
         
-        time.sleep(60)
+        await asyncio.sleep(60)
 
 # Định nghĩa hàm xử lý lệnh /stop
 async def stop(update: Update, context):
     await update.message.reply_text("Bot đã dừng lại!")
-    # Gửi lệnh dừng cho ứng dụng và kết thúc chương trình
-    await application.stop()
+    # Dừng luồng chạy spin
+    context.task.cancel()
 
 # Hàm chính
 def main():
